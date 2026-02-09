@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>🌙 التحدي الرمضاني العائلي</title>
+
+<style>
+body{direction:rtl;font-family:Tahoma;background:#0f2027;color:white;text-align:center}
+.box{background:white;color:black;padding:15px;margin:15px auto;max-width:520px;border-radius:12px}
+input,button{padding:8px;margin:5px}
+button{background:#27ae60;color:white;border:none;border-radius:6px;cursor:pointer}
+.progress{background:#ddd;border-radius:20px;overflow:hidden;margin:5px 0}
+.bar{height:18px;background:#27ae60}
+.small{font-size:13px;color:#444}
+</style>
+</head>
+
+<body>
+
+<h1>🌙 التحدي الرمضاني العائلي</h1>
+<p>🤍 لا تنسَ الدعاء لوالديك</p>
+
+<!-- تسجيل الدخول -->
+<div class="box">
+  <input id="name" placeholder="اسمك">
+  <input id="pass" type="password" placeholder="كلمة السر">
+  <button onclick="login()">دخول</button>
+</div>
+
+<!-- لوحة المستخدم -->
+<div id="panel" class="box" style="display:none">
+  <h3 id="welcome"></h3>
+
+  <b>📖 قرآنك الشخصي</b><br>
+  صفحات: <span id="mypages">0</span> |
+  أجزاء: <span id="myjuz">0</span><br>
+  <button onclick="addPersonal(1)">+ صفحة</button>
+  <button onclick="addPersonal(5)">+5 صفحات</button>
+
+  <hr>
+
+  <b>📖 القرآن العائلي</b><br>
+  صفحات: <span id="famQ">0</span> |
+  أجزاء: <span id="famJ">0</span><br>
+  <button id="famBtn" onclick="addFamilyQuran()">+ صفحة (محمد فقط)</button>
+
+  <hr>
+
+  <b>🤲 التقدّم العائلي</b><br>
+  أذكار: <span id="azkar">0</span>
+  <button onclick="addFam('azkar')">+</button><br>
+  صدقة: <span id="sadaqa">0</span>
+  <button onclick="addFam('sadaqa')">+</button>
+</div>
+
+<!-- من الخارج -->
+<div class="box">
+  <h3>🏁 التحدي العائلي – القرآن</h3>
+  <div id="list"></div>
+</div>
+
+<script>
+const users={
+ "هيثم كويس":{pass:"1111",pages:0},
+ "مصطفى كويس":{pass:"2222",pages:0},
+ "محمد":{pass:"1234",pages:0},
+ "طلال كويس":{pass:"3333",pages:0},
+ "جودي كويس":{pass:"4444",pages:0},
+ "احمد كويس":{pass:"5555",pages:0},
+ "منال رستم":{pass:"6666",pages:0},
+ "مياس علي":{pass:"7777",pages:0}
+};
+
+if(!localStorage.data){
+  localStorage.data=JSON.stringify({
+    users:users,
+    family:{quran:0,azkar:0,sadaqa:0}
+  });
+}
+
+let current="";
+
+function login(){
+  const n=name.value.trim(),p=pass.value;
+  const db=JSON.parse(localStorage.data);
+
+  if(!db.users[n]) return alert("الاسم غير موجود");
+  if(db.users[n].pass!==p) return alert("كلمة السر خطأ");
+
+  current=n;
+  panel.style.display="block";
+  welcome.innerText="أهلًا "+n;
+  famBtn.disabled = n!=="محمد";
+  updateUI();
+}
+
+function addPersonal(x){
+  const db=JSON.parse(localStorage.data);
+  db.users[current].pages+=x;
+  localStorage.data=JSON.stringify(db);
+  updateUI(); drawList();
+}
+
+function addFamilyQuran(){
+  const db=JSON.parse(localStorage.data);
+  db.family.quran++;
+  localStorage.data=JSON.stringify(db);
+  updateUI();
+}
+
+function addFam(t){
+  const db=JSON.parse(localStorage.data);
+  db.family[t]++;
+  localStorage.data=JSON.stringify(db);
+  updateUI();
+}
+
+function updateUI(){
+  const db=JSON.parse(localStorage.data);
+  const u=db.users[current];
+  mypages.innerText=u.pages;
+  myjuz.innerText=Math.floor(u.pages/20);
+
+  famQ.innerText=db.family.quran;
+  famJ.innerText=Math.floor(db.family.quran/20);
+  azkar.innerText=db.family.azkar;
+  sadaqa.innerText=db.family.sadaqa;
+}
+
+function drawList(){
+  const db=JSON.parse(localStorage.data);
+  let h="";
+  for(let n in db.users){
+    const p=db.users[n].pages;
+    const percent=Math.min(p/604*100,100);
+    h+=`<div class="small">${n}</div>
+    <div class="progress"><div class="bar" style="width:${percent}%"></div></div>`;
+  }
+  list.innerHTML=h;
+}
+drawList();
+</script>
+
+</body>
+</html>
